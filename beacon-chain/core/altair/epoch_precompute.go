@@ -307,7 +307,7 @@ func attestationDelta(
 	inactivityLeak bool) (*AttDelta, error) {
 	eligible := val.IsActivePrevEpoch || (val.IsSlashed && !val.IsWithdrawableCurrentEpoch)
 	// Per spec `ActiveCurrentEpoch` can't be 0 to process attestation delta.
-	if !eligible || bal.ActiveCurrentEpoch == big.NewInt(0) {
+	if !eligible || bal.ActiveCurrentEpoch.Cmp(big.NewInt(0)) == 0 {
 		return &AttDelta{}, nil
 	}
 

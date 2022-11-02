@@ -3,6 +3,7 @@ package doublylinkedtree
 import (
 	"context"
 	"fmt"
+	"math/big"
 	"time"
 
 	"github.com/pkg/errors"
@@ -45,8 +46,10 @@ func (s *Store) head(ctx context.Context) ([32]byte, error) {
 	currentEpoch := slots.EpochsSinceGenesis(time.Unix(int64(s.genesisTime), 0))
 	if !bestDescendant.viableForHead(s.justifiedCheckpoint.Epoch, currentEpoch) {
 		s.allTipsAreInvalid = true
+		weight := big.NewInt(10e9)
+		weight.Div(bestDescendant.weight, weight)
 		return [32]byte{}, fmt.Errorf("head at slot %d with weight %d is not eligible, finalizedEpoch, justified Epoch %d, %d != %d, %d",
-			bestDescendant.slot, bestDescendant.weight/10e9, bestDescendant.finalizedEpoch, bestDescendant.justifiedEpoch, s.finalizedCheckpoint.Epoch, s.justifiedCheckpoint.Epoch)
+			bestDescendant.slot, weight, bestDescendant.finalizedEpoch, bestDescendant.justifiedEpoch, s.finalizedCheckpoint.Epoch, s.justifiedCheckpoint.Epoch)
 	}
 	s.allTipsAreInvalid = false
 
@@ -85,6 +88,8 @@ func (s *Store) insert(ctx context.Context,
 		unrealizedFinalizedEpoch: finalizedEpoch,
 		optimistic:               true,
 		payloadHash:              payloadHash,
+		balance:                  big.NewInt(0),
+		weight:                   big.NewInt(0),
 		timestamp:                uint64(time.Now().Unix()),
 	}
 

@@ -2,6 +2,7 @@ package forkchoice
 
 import (
 	"context"
+	"math/big"
 
 	forkchoicetypes "github.com/prysmaticlabs/prysm/v5/beacon-chain/forkchoice/types"
 	"github.com/prysmaticlabs/prysm/v5/beacon-chain/state"
@@ -79,7 +80,7 @@ type FastGetter interface {
 	Slot([32]byte) (primitives.Slot, error)
 	TargetRootForEpoch([32]byte, primitives.Epoch) ([32]byte, error)
 	UnrealizedJustifiedPayloadBlockHash() [32]byte
-	Weight(root [32]byte) (uint64, error)
+	Weight(root [32]byte) (*big.Int, error)
 }
 
 // Setter allows to set forkchoice information

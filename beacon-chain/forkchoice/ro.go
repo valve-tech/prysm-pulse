@@ -1,6 +1,8 @@
 package forkchoice
 
 import (
+	"math/big"
+
 	forkchoicetypes "github.com/prysmaticlabs/prysm/v5/beacon-chain/forkchoice/types"
 	fieldparams "github.com/prysmaticlabs/prysm/v5/config/fieldparams"
 	"github.com/prysmaticlabs/prysm/v5/consensus-types/primitives"
@@ -129,7 +131,7 @@ func (ro *ROForkChoice) ReceivedBlocksLastEpoch() (uint64, error) {
 }
 
 // Weight delegates to the underlying forkchoice call, under a lock.
-func (ro *ROForkChoice) Weight(root [32]byte) (uint64, error) {
+func (ro *ROForkChoice) Weight(root [32]byte) (*big.Int, error) {
 	ro.l.RLock()
 	defer ro.l.RUnlock()
 	return ro.getter.Weight(root)

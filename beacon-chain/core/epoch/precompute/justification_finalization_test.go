@@ -2,6 +2,7 @@ package precompute_test
 
 import (
 	"context"
+	"math/big"
 	"testing"
 
 	"github.com/prysmaticlabs/go-bitfield"
@@ -42,7 +43,8 @@ func TestProcessJustificationAndFinalizationPreCompute_ConsecutiveEpochs(t *test
 	state, err := state_native.InitializeFromProtoPhase0(base)
 	require.NoError(t, err)
 	attestedBalance := 4 * uint64(e) * 3 / 2
-	b := &precompute.Balance{PrevEpochTargetAttested: attestedBalance}
+	b := precompute.NewBalance()
+	b.PrevEpochTargetAttested = new(big.Int).SetUint64(attestedBalance)
 	newState, err := precompute.ProcessJustificationAndFinalizationPreCompute(state, b)
 	require.NoError(t, err)
 	rt := [32]byte{byte(64)}
@@ -79,7 +81,8 @@ func TestProcessJustificationAndFinalizationPreCompute_JustifyCurrentEpoch(t *te
 	state, err := state_native.InitializeFromProtoPhase0(base)
 	require.NoError(t, err)
 	attestedBalance := 4 * uint64(e) * 3 / 2
-	b := &precompute.Balance{PrevEpochTargetAttested: attestedBalance}
+	b := precompute.NewBalance()
+	b.PrevEpochTargetAttested = new(big.Int).SetUint64(attestedBalance)
 	newState, err := precompute.ProcessJustificationAndFinalizationPreCompute(state, b)
 	require.NoError(t, err)
 	rt := [32]byte{byte(64)}
@@ -115,7 +118,8 @@ func TestProcessJustificationAndFinalizationPreCompute_JustifyPrevEpoch(t *testi
 	state, err := state_native.InitializeFromProtoPhase0(base)
 	require.NoError(t, err)
 	attestedBalance := 4 * uint64(e) * 3 / 2
-	b := &precompute.Balance{PrevEpochTargetAttested: attestedBalance}
+	b := precompute.NewBalance()
+	b.PrevEpochTargetAttested = new(big.Int).SetUint64(attestedBalance)
 	newState, err := precompute.ProcessJustificationAndFinalizationPreCompute(state, b)
 	require.NoError(t, err)
 	rt := [32]byte{byte(64)}

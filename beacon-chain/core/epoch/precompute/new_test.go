@@ -2,6 +2,7 @@ package precompute_test
 
 import (
 	"context"
+	"math/big"
 	"testing"
 
 	"github.com/prysmaticlabs/prysm/v5/beacon-chain/core/epoch/precompute"
@@ -57,9 +58,8 @@ func TestNew(t *testing.T) {
 		InclusionSlot:                e,
 	}, v[3], "Incorrect validator 3 status")
 
-	wantedBalances := &precompute.Balance{
-		ActiveCurrentEpoch: 100,
-		ActivePrevEpoch:    200,
-	}
+	wantedBalances := precompute.NewBalance()
+	wantedBalances.ActiveCurrentEpoch = big.NewInt(100)
+	wantedBalances.ActivePrevEpoch = big.NewInt(200)
 	assert.DeepEqual(t, wantedBalances, b, "Incorrect wanted balance")
 }

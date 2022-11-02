@@ -4,6 +4,7 @@ import (
 	"context"
 	goErrors "errors"
 	"fmt"
+	"math/big"
 	"time"
 
 	"github.com/pkg/errors"
@@ -139,8 +140,9 @@ func NextSyncCommitteeIndices(ctx context.Context, s state.BeaconState) ([]primi
 			return nil, err
 		}
 
-		effectiveBal := v.EffectiveBalance()
-		if effectiveBal*maxRandomByte >= cfg.MaxEffectiveBalance*uint64(randomByte) {
+		effectiveBal := new(big.Int).SetUint64(v.EffectiveBalance())
+		effectiveBal.Mul(effectiveBal, new(big.Int).SetUint64(maxRandomByte))
+		if effectiveBal.Cmp(new(big.Int).SetUint64(cfg.MaxEffectiveBalance*uint64(randomByte))) != -1 {
 			cIndices = append(cIndices, cIndex)
 		}
 	}

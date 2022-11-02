@@ -2,6 +2,7 @@ package altair
 
 import (
 	"context"
+	"math/big"
 
 	"github.com/pkg/errors"
 	"github.com/prysmaticlabs/prysm/v5/beacon-chain/core/epoch/precompute"
@@ -28,7 +29,7 @@ func InitializePrecomputeValidators(ctx context.Context, beaconState state.Beaco
 	_, span := trace.StartSpan(ctx, "altair.InitializePrecomputeValidators")
 	defer span.End()
 	vals := make([]*precompute.Validator, beaconState.NumValidators())
-	bal := &precompute.Balance{}
+	bal := precompute.NewBalance()
 	prevEpoch := time.PrevEpoch(beaconState)
 	currentEpoch := time.CurrentEpoch(beaconState)
 	inactivityScores, err := beaconState.InactivityScores()
@@ -43,6 +44,7 @@ func InitializePrecomputeValidators(ctx context.Context, beaconState state.Beaco
 	}
 	if err := beaconState.ReadFromEveryValidator(func(idx int, val state.ReadOnlyValidator) error {
 		// Set validator's balance, inactivity score and slashed/withdrawable status.
+		effectiveBalance := new(big.Int).SetUint64(val.EffectiveBalance())
 		v := &precompute.Validator{
 			CurrentEpochEffectiveBalance: val.EffectiveBalance(),
 			InactivityScore:              inactivityScores[idx],
@@ -52,18 +54,12 @@ func InitializePrecomputeValidators(ctx context.Context, beaconState state.Beaco
 		// Set validator's active status for current epoch.
 		if helpers.IsActiveValidatorUsingTrie(val, currentEpoch) {
 			v.IsActiveCurrentEpoch = true
-			bal.ActiveCurrentEpoch, err = math.Add64(bal.ActiveCurrentEpoch, val.EffectiveBalance())
-			if err != nil {
-				return err
-			}
+			bal.ActiveCurrentEpoch.Add(bal.ActiveCurrentEpoch, effectiveBalance)
 		}
 		// Set validator's active status for previous epoch.
 		if helpers.IsActiveValidatorUsingTrie(val, prevEpoch) {
 			v.IsActivePrevEpoch = true
-			bal.ActivePrevEpoch, err = math.Add64(bal.ActivePrevEpoch, val.EffectiveBalance())
-			if err != nil {
-				return err
-			}
+			bal.ActivePrevEpoch.Add(bal.ActivePrevEpoch, effectiveBalance)
 		}
 		vals[idx] = v
 		return nil
@@ -274,7 +270,8 @@ func AttestationsDelta(beaconState state.BeaconState, bal *precompute.Balance, v
 	finalizedEpoch := beaconState.FinalizedCheckpointEpoch()
 	increment := cfg.EffectiveBalanceIncrement
 	factor := cfg.BaseRewardFactor
-	baseRewardMultiplier := increment * factor / math.CachedSquareRoot(bal.ActiveCurrentEpoch)
+	activeCurrentEpochSqrt := new(big.Int).Sqrt(bal.ActiveCurrentEpoch).Uint64()
+	baseRewardMultiplier := increment * factor / activeCurrentEpochSqrt
 	leak := helpers.IsInInactivityLeak(prevEpoch, finalizedEpoch)
 
 	// Modified in Altair and Bellatrix.
@@ -302,15 +299,15 @@ func attestationDelta(
 	inactivityLeak bool) (*AttDelta, error) {
 	eligible := val.IsActivePrevEpoch || (val.IsSlashed && !val.IsWithdrawableCurrentEpoch)
 	// Per spec `ActiveCurrentEpoch` can't be 0 to process attestation delta.
-	if !eligible || bal.ActiveCurrentEpoch == 0 {
+	if !eligible || bal.ActiveCurrentEpoch.Cmp(big.NewInt(0)) == 0 {
 		return &AttDelta{}, nil
 	}
 
 	cfg := params.BeaconConfig()
-	increment := cfg.EffectiveBalanceIncrement
+	increment := new(big.Int).SetUint64(cfg.EffectiveBalanceIncrement)
 	effectiveBalance := val.CurrentEpochEffectiveBalance
-	baseReward := (effectiveBalance / increment) * baseRewardMultiplier
-	activeIncrement := bal.ActiveCurrentEpoch / increment
+	baseReward := (effectiveBalance / cfg.EffectiveBalanceIncrement) * baseRewardMultiplier
+	activeIncrement := new(big.Int).Div(bal.ActiveCurrentEpoch, increment).Uint64()
 
 	weightDenominator := cfg.WeightDenominator
 	srcWeight := cfg.TimelySourceWeight
@@ -320,7 +317,7 @@ func attestationDelta(
 	// Process source reward / penalty
 	if val.IsPrevEpochSourceAttester && !val.IsSlashed {
 		if !inactivityLeak {
-			n := baseReward * srcWeight * (bal.PrevEpochAttested / increment)
+			n := baseReward * srcWeight * (new(big.Int).Div(bal.PrevEpochAttested, increment)).Uint64()
 			attDelta.SourceReward += n / (activeIncrement * weightDenominator)
 		}
 	} else {
@@ -330,7 +327,7 @@ func attestationDelta(
 	// Process target reward / penalty
 	if val.IsPrevEpochTargetAttester && !val.IsSlashed {
 		if !inactivityLeak {
-			n := baseReward * tgtWeight * (bal.PrevEpochTargetAttested / increment)
+			n := baseReward * tgtWeight * (new(big.Int).Div(bal.PrevEpochTargetAttested, increment)).Uint64()
 			attDelta.TargetReward += n / (activeIncrement * weightDenominator)
 		}
 	} else {
@@ -340,7 +337,7 @@ func attestationDelta(
 	// Process head reward / penalty
 	if val.IsPrevEpochHeadAttester && !val.IsSlashed {
 		if !inactivityLeak {
-			n := baseReward * headWeight * (bal.PrevEpochHeadAttested / increment)
+			n := baseReward * headWeight * (new(big.Int).Div(bal.PrevEpochHeadAttested, increment)).Uint64()
 			attDelta.HeadReward += n / (activeIncrement * weightDenominator)
 		}
 	}

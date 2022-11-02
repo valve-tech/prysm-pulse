@@ -2,6 +2,7 @@ package doublylinkedtree
 
 import (
 	"context"
+	"math/big"
 	"testing"
 	"time"
 
@@ -34,7 +35,7 @@ func TestForkChoice_BoostProposerRoot_PreventsExAnteAttack(t *testing.T) {
 	t.Run("back-propagates boost score to ancestors after proposer boosting", func(t *testing.T) {
 		f := setup(jEpoch, fEpoch)
 		f.justifiedBalances = balances
-		f.store.committeeWeight = uint64(len(balances)*10) / uint64(params.BeaconConfig().SlotsPerEpoch)
+		f.store.committeeWeight = new(big.Int).SetUint64(uint64(len(balances)*10) / uint64(params.BeaconConfig().SlotsPerEpoch))
 		f.numActiveValidators = uint64(len(balances))
 
 		// The head should always start at the finalized block.
@@ -154,7 +155,7 @@ func TestForkChoice_BoostProposerRoot_PreventsExAnteAttack(t *testing.T) {
 
 		// Expect nodes to have a boosted, back-propagated score.
 		// Ancestors have the added weights of their children. Genesis is a special exception at 0 weight,
-		require.Equal(t, f.store.treeRootNode.weight, uint64(0))
+		require.Equal(t, f.store.treeRootNode.weight.Uint64(), uint64(0))
 
 		// Proposer boost score with these test parameters is 8
 		// Each of the nodes received one attestation accounting for 10.
@@ -164,13 +165,13 @@ func TestForkChoice_BoostProposerRoot_PreventsExAnteAttack(t *testing.T) {
 		//		    \--------------->(4: 18)
 		//
 		node1 := f.store.nodeByRoot[indexToHash(1)]
-		require.Equal(t, node1.weight, uint64(48))
+		require.Equal(t, node1.weight.Uint64(), uint64(48))
 		node2 := f.store.nodeByRoot[indexToHash(2)]
-		require.Equal(t, node2.weight, uint64(38))
+		require.Equal(t, node2.weight.Uint64(), uint64(38))
 		node3 := f.store.nodeByRoot[indexToHash(3)]
-		require.Equal(t, node3.weight, uint64(10))
+		require.Equal(t, node3.weight.Uint64(), uint64(10))
 		node4 := f.store.nodeByRoot[indexToHash(4)]
-		require.Equal(t, node4.weight, uint64(18))
+		require.Equal(t, node4.weight.Uint64(), uint64(18))
 
 		// Regression: process attestations for C, check that it
 		// becomes head, we need two attestations to have C.weight = 30 > 24 = D.weight
@@ -327,7 +328,7 @@ func TestForkChoice_BoostProposerRoot_PreventsExAnteAttack(t *testing.T) {
 		//	Block D received at N+3 — D is head
 		f := setup(jEpoch, fEpoch)
 		f.justifiedBalances = balances
-		f.store.committeeWeight = uint64(len(balances)*10) / uint64(params.BeaconConfig().SlotsPerEpoch)
+		f.store.committeeWeight = new(big.Int).SetUint64(uint64(len(balances)*10) / uint64(params.BeaconConfig().SlotsPerEpoch))
 		f.numActiveValidators = uint64(len(balances))
 		a := zeroHash
 

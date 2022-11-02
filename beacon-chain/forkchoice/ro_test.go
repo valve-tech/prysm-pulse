@@ -2,6 +2,7 @@ package forkchoice
 
 import (
 	"io"
+	"math/big"
 	"testing"
 
 	forkchoicetypes "github.com/prysmaticlabs/prysm/v5/beacon-chain/forkchoice/types"
@@ -261,9 +262,9 @@ func (ro *mockROForkchoice) ReceivedBlocksLastEpoch() (uint64, error) {
 	return 0, nil
 }
 
-func (ro *mockROForkchoice) Weight(_ [32]byte) (uint64, error) {
+func (ro *mockROForkchoice) Weight(_ [32]byte) (*big.Int, error) {
 	ro.calls = append(ro.calls, weightCalled)
-	return 0, nil
+	return new(big.Int), nil
 }
 
 func (ro *mockROForkchoice) IsOptimistic(_ [32]byte) (bool, error) {

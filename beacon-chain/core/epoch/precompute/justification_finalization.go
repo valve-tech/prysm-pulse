@@ -1,6 +1,8 @@
 package precompute
 
 import (
+	"math/big"
+
 	"github.com/pkg/errors"
 	"github.com/prysmaticlabs/go-bitfield"
 	"github.com/prysmaticlabs/prysm/v5/beacon-chain/core/helpers"
@@ -69,15 +71,19 @@ func ProcessJustificationAndFinalizationPreCompute(state state.BeaconState, pBal
 }
 
 // processJustificationBits processes the justification bits during epoch processing.
-func processJustificationBits(state state.BeaconState, totalActiveBalance, prevEpochTargetBalance, currEpochTargetBalance uint64) bitfield.Bitvector4 {
+func processJustificationBits(state state.BeaconState, totalActiveBalance, prevEpochTargetBalance, currEpochTargetBalance *big.Int) bitfield.Bitvector4 {
 	newBits := state.JustificationBits()
 	newBits.Shift(1)
 	// If 2/3 or more of total balance attested in the previous epoch.
-	if 3*prevEpochTargetBalance >= 2*totalActiveBalance {
+	three := big.NewInt(3)
+	prevEpochTargetBalanceTimesThree := new(big.Int).Mul(three, prevEpochTargetBalance)
+	currEpochTargetBalanceTimesThree := new(big.Int).Mul(three, currEpochTargetBalance)
+	totalActiveBalanceTimesTwo := new(big.Int).Mul(big.NewInt(2), totalActiveBalance)
+	if prevEpochTargetBalanceTimesThree.Cmp(totalActiveBalanceTimesTwo) != -1 {
 		newBits.SetBitAt(1, true)
 	}
 
-	if 3*currEpochTargetBalance >= 2*totalActiveBalance {
+	if currEpochTargetBalanceTimesThree.Cmp(totalActiveBalanceTimesTwo) != -1 {
 		newBits.SetBitAt(0, true)
 	}
 

@@ -3,6 +3,7 @@ package altair
 import (
 	"context"
 	"math"
+	"math/big"
 	"testing"
 
 	"github.com/prysmaticlabs/prysm/v5/beacon-chain/core/epoch/precompute"
@@ -56,10 +57,10 @@ func TestInitializeEpochValidators_Ok(t *testing.T) {
 		InactivityScore:              3,
 	}, v[3], "Incorrect validator 3 status")
 
-	wantedBalances := &precompute.Balance{
-		ActiveCurrentEpoch: 100,
-		ActivePrevEpoch:    200,
-	}
+	wantedBalances := precompute.NewBalance()
+	wantedBalances.ActiveCurrentEpoch = big.NewInt(100)
+	wantedBalances.ActivePrevEpoch = big.NewInt(200)
+
 	assert.DeepEqual(t, wantedBalances, b, "Incorrect wanted balance")
 }
 
@@ -75,7 +76,8 @@ func TestInitializeEpochValidators_Overflow(t *testing.T) {
 	})
 	require.NoError(t, err)
 	_, _, err = InitializePrecomputeValidators(context.Background(), s)
-	require.ErrorContains(t, "could not read every validator: addition overflows", err)
+	// This no longer overflows as total balance is big.int
+	require.NoError(t, err)
 }
 
 func TestInitializeEpochValidators_BadState(t *testing.T) {
@@ -133,10 +135,10 @@ func TestProcessEpochParticipation(t *testing.T) {
 		IsPrevEpochTargetAttester:    true,
 		IsPrevEpochHeadAttester:      true,
 	}, validators[3])
-	require.Equal(t, params.BeaconConfig().MaxEffectiveBalance*3, balance.PrevEpochAttested)
-	require.Equal(t, balance.CurrentEpochTargetAttested, params.BeaconConfig().MaxEffectiveBalance*2)
-	require.Equal(t, balance.PrevEpochTargetAttested, params.BeaconConfig().MaxEffectiveBalance*2)
-	require.Equal(t, balance.PrevEpochHeadAttested, params.BeaconConfig().MaxEffectiveBalance*1)
+	require.Equal(t, params.BeaconConfig().MaxEffectiveBalance*3, balance.PrevEpochAttested.Uint64())
+	require.Equal(t, balance.CurrentEpochTargetAttested.Uint64(), params.BeaconConfig().MaxEffectiveBalance*2)
+	require.Equal(t, balance.PrevEpochTargetAttested.Uint64(), params.BeaconConfig().MaxEffectiveBalance*2)
+	require.Equal(t, balance.PrevEpochHeadAttested.Uint64(), params.BeaconConfig().MaxEffectiveBalance*1)
 }
 
 func TestProcessEpochParticipation_InactiveValidator(t *testing.T) {
@@ -200,10 +202,10 @@ func TestProcessEpochParticipation_InactiveValidator(t *testing.T) {
 		IsPrevEpochTargetAttester:    true,
 		IsPrevEpochHeadAttester:      true,
 	}, validators[2])
-	require.Equal(t, balance.PrevEpochAttested, 2*params.BeaconConfig().MaxEffectiveBalance)
-	require.Equal(t, balance.CurrentEpochTargetAttested, params.BeaconConfig().MaxEffectiveBalance)
-	require.Equal(t, balance.PrevEpochTargetAttested, 2*params.BeaconConfig().MaxEffectiveBalance)
-	require.Equal(t, balance.PrevEpochHeadAttested, params.BeaconConfig().MaxEffectiveBalance)
+	require.Equal(t, balance.PrevEpochAttested.Uint64(), 2*params.BeaconConfig().MaxEffectiveBalance)
+	require.Equal(t, balance.CurrentEpochTargetAttested.Uint64(), params.BeaconConfig().MaxEffectiveBalance)
+	require.Equal(t, balance.PrevEpochTargetAttested.Uint64(), 2*params.BeaconConfig().MaxEffectiveBalance)
+	require.Equal(t, balance.PrevEpochHeadAttested.Uint64(), params.BeaconConfig().MaxEffectiveBalance)
 }
 
 func TestAttestationsDelta(t *testing.T) {

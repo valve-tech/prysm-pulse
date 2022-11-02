@@ -1,6 +1,7 @@
 package doublylinkedtree
 
 import (
+	"math/big"
 	"time"
 
 	"github.com/prysmaticlabs/prysm/v5/config/params"
@@ -78,7 +79,7 @@ func (f *ForkChoice) ShouldOverrideFCU() (override bool) {
 	// }
 
 	// Only orphan a block if the head LMD vote is weak
-	if head.weight*100 > f.store.committeeWeight*params.BeaconConfig().ReorgWeightThreshold {
+	if f.headVoteIsStrong() {
 		return
 	}
 
@@ -92,7 +93,7 @@ func (f *ForkChoice) ShouldOverrideFCU() (override bool) {
 		return true
 	}
 	// Only orphan a block if the parent LMD vote is strong
-	if parent.weight*100 < f.store.committeeWeight*params.BeaconConfig().ReorgParentWeightThreshold {
+	if f.parentVoteIsWeak() {
 		return
 	}
 	return true
@@ -143,12 +144,12 @@ func (f *ForkChoice) GetProposerHead() [32]byte {
 	}
 
 	// Only orphan a block if the head LMD vote is weak
-	if head.weight*100 > f.store.committeeWeight*params.BeaconConfig().ReorgWeightThreshold {
+	if f.headVoteIsStrong() {
 		return head.root
 	}
 
 	// Only orphan a block if the parent LMD vote is strong
-	if parent.weight*100 < f.store.committeeWeight*params.BeaconConfig().ReorgParentWeightThreshold {
+	if f.parentVoteIsWeak() {
 		return head.root
 	}
 
@@ -162,4 +163,26 @@ func (f *ForkChoice) GetProposerHead() [32]byte {
 		return head.root
 	}
 	return parent.root
+}
+
+// headVoteIsStrong returns true if the head LMD vote is explicitly above the threshold.
+func (f *ForkChoice) headVoteIsStrong() bool {
+	// This function replaces the following upstream code, using big.Int:
+	// head.weight*100 > f.store.committeeWeight*params.BeaconConfig().ReorgWeightThreshold
+	head := f.store.headNode
+	scaledHeadWeight := new(big.Int).Mul(head.weight, big.NewInt(100))
+	threshold := new(big.Int).SetUint64(params.BeaconConfig().ReorgWeightThreshold)
+	threshold.Mul(threshold, f.store.committeeWeight)
+	return scaledHeadWeight.Cmp(threshold) == 1
+}
+
+// parentVoteIsWeak returns true if the parent LMD vote is explicitly below the threshold.
+func (f *ForkChoice) parentVoteIsWeak() bool {
+	// This function replaces the following upstream code, using big.Int:
+	// parent.weight*100 < f.store.committeeWeight*params.BeaconConfig().ReorgParentWeightThreshold
+	parent := f.store.headNode.parent
+	scaledParentWeight := new(big.Int).Mul(parent.weight, big.NewInt(100))
+	threshold := new(big.Int).SetUint64(params.BeaconConfig().ReorgParentWeightThreshold)
+	threshold.Mul(threshold, f.store.committeeWeight)
+	return scaledParentWeight.Cmp(threshold) == -1
 }

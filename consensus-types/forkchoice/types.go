@@ -1,6 +1,8 @@
 package forkchoice
 
 import (
+	"math/big"
+
 	"github.com/prysmaticlabs/prysm/v5/consensus-types/primitives"
 	eth "github.com/prysmaticlabs/prysm/v5/proto/prysm/v1alpha1"
 )
@@ -45,8 +47,8 @@ type Node struct {
 	FinalizedEpoch           primitives.Epoch
 	UnrealizedJustifiedEpoch primitives.Epoch
 	UnrealizedFinalizedEpoch primitives.Epoch
-	Balance                  uint64
-	Weight                   uint64
+	Balance                  *big.Int
+	Weight                   *big.Int
 	Timestamp                uint64
 	BlockRoot                []byte
 	ParentRoot               []byte

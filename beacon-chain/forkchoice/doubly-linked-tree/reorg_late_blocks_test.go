@@ -2,6 +2,7 @@ package doublylinkedtree
 
 import (
 	"context"
+	"math/big"
 	"testing"
 
 	"github.com/prysmaticlabs/prysm/v5/config/params"
@@ -14,9 +15,9 @@ func TestForkChoice_ShouldOverrideFCU(t *testing.T) {
 	f.justifiedBalances = make([]uint64, f.numActiveValidators)
 	for i := range f.justifiedBalances {
 		f.justifiedBalances[i] = uint64(10)
-		f.store.committeeWeight += uint64(10)
+		f.store.committeeWeight.Add(f.store.committeeWeight, big.NewInt(10))
 	}
-	f.store.committeeWeight /= uint64(params.BeaconConfig().SlotsPerEpoch)
+	f.store.committeeWeight.Div(f.store.committeeWeight, new(big.Int).SetUint64(uint64(params.BeaconConfig().SlotsPerEpoch)))
 	ctx := context.Background()
 	driftGenesisTime(f, 1, 0)
 	st, root, err := prepareForkchoiceState(ctx, 1, [32]byte{'a'}, [32]byte{}, [32]byte{'A'}, 0, 0)
@@ -87,14 +88,14 @@ func TestForkChoice_ShouldOverrideFCU(t *testing.T) {
 	})
 	t.Run("parent is weak early call", func(t *testing.T) {
 		saved := f.store.headNode.parent.weight
-		f.store.headNode.parent.weight = 0
+		f.store.headNode.parent.weight = big.NewInt(0)
 		require.Equal(t, true, f.ShouldOverrideFCU())
 		f.store.headNode.parent.weight = saved
 	})
 	t.Run("parent is weak late call", func(t *testing.T) {
 		saved := f.store.headNode.parent.weight
 		driftGenesisTime(f, 2, 11)
-		f.store.headNode.parent.weight = 0
+		f.store.headNode.parent.weight = big.NewInt(0)
 		require.Equal(t, false, f.ShouldOverrideFCU())
 		f.store.headNode.parent.weight = saved
 		driftGenesisTime(f, 2, orphanLateBlockFirstThreshold+1)
@@ -111,9 +112,9 @@ func TestForkChoice_GetProposerHead(t *testing.T) {
 	f.justifiedBalances = make([]uint64, f.numActiveValidators)
 	for i := range f.justifiedBalances {
 		f.justifiedBalances[i] = uint64(10)
-		f.store.committeeWeight += uint64(10)
+		f.store.committeeWeight.Add(f.store.committeeWeight, big.NewInt(10))
 	}
-	f.store.committeeWeight /= uint64(params.BeaconConfig().SlotsPerEpoch)
+	f.store.committeeWeight.Div(f.store.committeeWeight, new(big.Int).SetUint64(uint64(params.BeaconConfig().SlotsPerEpoch)))
 	ctx := context.Background()
 	driftGenesisTime(f, 1, 0)
 	parentRoot := [32]byte{'a'}
@@ -187,7 +188,7 @@ func TestForkChoice_GetProposerHead(t *testing.T) {
 	})
 	t.Run("parent is weak", func(t *testing.T) {
 		saved := f.store.headNode.parent.weight
-		f.store.headNode.parent.weight = 0
+		f.store.headNode.parent.weight = big.NewInt(0)
 		require.Equal(t, false, f.ShouldOverrideFCU())
 		f.store.headNode.parent.weight = saved
 	})

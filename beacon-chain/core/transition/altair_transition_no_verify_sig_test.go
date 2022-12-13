@@ -226,8 +226,12 @@ func TestProcessEpoch_BadBalanceAltair(t *testing.T) {
 	epochParticipation[0] = participation
 	assert.NoError(t, s.SetCurrentParticipationBits(epochParticipation))
 	assert.NoError(t, s.SetPreviousParticipationBits(epochParticipation))
-	_, err = altair.ProcessEpoch(context.Background(), s)
-	assert.ErrorContains(t, "addition overflows", err)
+	s, err = altair.ProcessEpoch(context.Background(), s)
+	assert.NoError(t, err)
+	// verify overflow prevented
+	bal, err := s.BalanceAtIndex(0)
+	assert.NoError(t, err)
+	assert.Equal(t, uint64(math.MaxUint64), bal)
 }
 
 func createFullAltairBlockWithOperations(t *testing.T) (state.BeaconState,

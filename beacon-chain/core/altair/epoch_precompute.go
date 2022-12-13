@@ -345,11 +345,11 @@ func attestationDelta(
 	// Process finality delay penalty
 	// Apply an additional penalty to validators that did not vote on the correct target or slashed
 	if !val.IsPrevEpochTargetAttester || val.IsSlashed {
-		n, err := math.Mul64(effectiveBalance, val.InactivityScore)
-		if err != nil {
-			return &AttDelta{}, err
-		}
-		attDelta.InactivityPenalty = n / inactivityDenominator
+		// effectiveBalance * val.InactivityScore / inactivityDenominator
+		inactivityPenalty := new(big.Int).SetUint64(effectiveBalance)
+		inactivityPenalty.Mul(inactivityPenalty, new(big.Int).SetUint64(val.InactivityScore))
+		inactivityPenalty.Div(inactivityPenalty, new(big.Int).SetUint64(inactivityDenominator))
+		attDelta.InactivityPenalty = inactivityPenalty.Uint64()
 	}
 
 	return attDelta, nil

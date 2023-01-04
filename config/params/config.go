@@ -318,6 +318,11 @@ func (b *BeaconChainConfig) MaximumGossipClockDisparityDuration() time.Duration 
 	return time.Duration(b.MaximumGossipClockDisparity) * time.Millisecond
 }
 
+// IsPulseChain returns true if the current chain config is running the pulsechain preset.
+func (b *BeaconChainConfig) IsPulseChain() bool {
+	return b.PresetBase == "pulsechain"
+}
+
 // DenebEnabled centralizes the check to determine if code paths
 // that are specific to deneb should be allowed to execute. This will make it easier to find call sites that do this
 // kind of check and remove them post-deneb.

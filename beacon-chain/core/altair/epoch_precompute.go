@@ -244,7 +244,7 @@ func ProcessRewardsAndPenaltiesPrecompute(
 		// Compute the post balance of the validator after accounting for the
 		// attester and proposer rewards and penalties.
 		delta := attDeltas[i]
-		balances[i], err = helpers.IncreaseBalanceWithVal(balances[i], delta.HeadReward+delta.SourceReward+delta.TargetReward)
+		balances[i], err = helpers.IncreaseBalanceWithVal(balances[i], delta.HeadReward+delta.SourceReward+delta.TargetReward, cfg.IsPulseChain())
 		if err != nil {
 			return nil, err
 		}

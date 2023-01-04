@@ -66,6 +66,7 @@ func processSyncAggregate(ctx context.Context, s state.BeaconState, sync *ethpb.
 	[]bls.PublicKey,
 	uint64,
 	error) {
+	cfg := params.BeaconConfig()
 	currentSyncCommittee, err := s.CurrentSyncCommittee()
 	if err != nil {
 		return nil, nil, 0, err
@@ -106,7 +107,7 @@ func processSyncAggregate(ctx context.Context, s state.BeaconState, sync *ethpb.
 				return nil, nil, 0, err
 			}
 			votedKeys = append(votedKeys, pubKey)
-			if err := helpers.IncreaseBalance(s, vIdx, participantReward); err != nil {
+			if err := helpers.IncreaseBalance(s, vIdx, participantReward, cfg.IsPulseChain()); err != nil {
 				return nil, nil, 0, err
 			}
 			earnedProposerReward += proposerReward
@@ -116,7 +117,7 @@ func processSyncAggregate(ctx context.Context, s state.BeaconState, sync *ethpb.
 			}
 		}
 	}
-	if err := helpers.IncreaseBalance(s, proposerIndex, earnedProposerReward); err != nil {
+	if err := helpers.IncreaseBalance(s, proposerIndex, earnedProposerReward, cfg.IsPulseChain()); err != nil {
 		return nil, nil, 0, err
 	}
 	return s, votedKeys, earnedProposerReward, err

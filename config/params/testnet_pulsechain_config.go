@@ -14,6 +14,7 @@ func UsePulseChainTestnetNetworkConfig() {
 func PulseChainTestnetConfig() *BeaconChainConfig {
 	cfg := MainnetConfig().Copy()
 	cfg.ConfigName = PulseChainTestnetName
+	cfg.PresetBase = "pulsechain"
 	cfg.TerminalTotalDifficulty = "58750003716598352947541"
 	cfg.MinGenesisActiveValidatorCount = 5000
 	cfg.MinGenesisTime = 1674864000

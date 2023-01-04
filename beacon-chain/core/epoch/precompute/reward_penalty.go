@@ -23,6 +23,7 @@ func ProcessRewardsAndPenaltiesPrecompute(
 	attRewardsFunc attesterRewardsFunc,
 	proRewardsFunc proposerRewardsFunc,
 ) (state.BeaconState, error) {
+	cfg := params.BeaconConfig()
 	// Can't process rewards and penalties in genesis epoch.
 	if time.CurrentEpoch(state) == 0 {
 		return state, nil
@@ -48,7 +49,7 @@ func ProcessRewardsAndPenaltiesPrecompute(
 
 		// Compute the post balance of the validator after accounting for the
 		// attester and proposer rewards and penalties.
-		validatorBals[i], err = helpers.IncreaseBalanceWithVal(validatorBals[i], attsRewards[i]+proposerRewards[i])
+		validatorBals[i], err = helpers.IncreaseBalanceWithVal(validatorBals[i], attsRewards[i]+proposerRewards[i], cfg.IsPulseChain())
 		if err != nil {
 			return nil, err
 		}

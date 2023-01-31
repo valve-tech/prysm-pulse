@@ -130,6 +130,20 @@ func configureTestnet(ctx *cli.Context) error {
 		}
 		applyPraterFeatureFlags(ctx)
 		params.UsePraterNetworkConfig()
+	} else if ctx.Bool(PulseChain.Name) {
+		log.Warn("Running on PulseChain Mainnet")
+		if err := params.SetActive(params.PulseChainConfig().Copy()); err != nil {
+			return err
+		}
+		applyPulseChainFeatureFlags(ctx)
+		params.UsePulseChainNetworkConfig()
+	} else if ctx.Bool(PulseChainTestnet.Name) {
+		log.Warn("Running on PulseChain Testnet")
+		if err := params.SetActive(params.PulseChainTestnetConfig().Copy()); err != nil {
+			return err
+		}
+		applyPulseChainTestnetFeatureFlags(ctx)
+		params.UsePulseChainTestnetNetworkConfig()
 	} else if ctx.Bool(SepoliaTestnet.Name) {
 		log.Info("Running on the Sepolia Beacon Chain Testnet")
 		if err := params.SetActive(params.SepoliaConfig().Copy()); err != nil {
@@ -159,6 +173,14 @@ func configureTestnet(ctx *cli.Context) error {
 
 // Insert feature flags within the function to be enabled for Prater testnet.
 func applyPraterFeatureFlags(ctx *cli.Context) {
+}
+
+// Insert feature flags within the function to be enabled for PulseChain mainnet.
+func applyPulseChainFeatureFlags(ctx *cli.Context) {
+}
+
+// Insert feature flags within the function to be enabled for PulseChain testnet.
+func applyPulseChainTestnetFeatureFlags(ctx *cli.Context) {
 }
 
 // Insert feature flags within the function to be enabled for Sepolia testnet.

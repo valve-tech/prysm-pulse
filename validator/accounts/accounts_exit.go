@@ -171,6 +171,7 @@ func displayExitInfo(rawExitedKeys [][]byte, trimmedExitedKeys []string) {
 }
 
 func formatBeaconChaURL(key []byte) string {
+	// TODO: Add URLs for PulseChain explorer.
 	baseURL := "https://%sbeaconcha.in/validator/%s"
 	keyWithout0x := hexutil.Encode(key)[2:]
 

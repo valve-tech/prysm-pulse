@@ -4,7 +4,6 @@ import (
 	"github.com/prysmaticlabs/prysm/v5/cmd"
 	"github.com/prysmaticlabs/prysm/v5/cmd/validator/flags"
 	"github.com/prysmaticlabs/prysm/v5/config/features"
-	"github.com/prysmaticlabs/prysm/v5/runtime/tos"
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
 )
@@ -36,13 +35,9 @@ var Commands = &cli.Command{
 				features.PulseChainTestnet,
 				features.SepoliaTestnet,
 				features.HoleskyTestnet,
-				cmd.AcceptTosFlag,
 			}),
 			Before: func(cliCtx *cli.Context) error {
 				if err := cmd.LoadFlagsFromConfig(cliCtx, cliCtx.Command.Flags); err != nil {
-					return err
-				}
-				if err := tos.VerifyTosAcceptedOrPrompt(cliCtx); err != nil {
 					return err
 				}
 				return features.ConfigureValidator(cliCtx)
@@ -70,13 +65,9 @@ var Commands = &cli.Command{
 				features.PulseChainTestnet,
 				features.SepoliaTestnet,
 				features.HoleskyTestnet,
-				cmd.AcceptTosFlag,
 			}),
 			Before: func(cliCtx *cli.Context) error {
 				if err := cmd.LoadFlagsFromConfig(cliCtx, cliCtx.Command.Flags); err != nil {
-					return err
-				}
-				if err := tos.VerifyTosAcceptedOrPrompt(cliCtx); err != nil {
 					return err
 				}
 				return features.ConfigureBeaconChain(cliCtx)

@@ -71,7 +71,6 @@ var appHelpFlagGroups = []flagGroup{
 			cmd.ConfigFileFlag,
 			cmd.ChainConfigFileFlag,
 			cmd.GrpcMaxCallRecvMsgSizeFlag,
-			cmd.AcceptTosFlag,
 			cmd.RestoreSourceFileFlag,
 			cmd.RestoreTargetDirFlag,
 			cmd.ValidatorMonitorIndicesFlag,

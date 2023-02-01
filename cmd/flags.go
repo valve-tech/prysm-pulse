@@ -235,11 +235,6 @@ var (
 		50Mb. The default here is set to a very high value for local users.`,
 		Value: math.MaxInt32,
 	}
-	// AcceptTosFlag specifies user acceptance of ToS for non-interactive environments.
-	AcceptTosFlag = &cli.BoolFlag{
-		Name:  "accept-terms-of-use",
-		Usage: "Accepts Terms and Conditions (for non-interactive environments).",
-	}
 	// ValidatorMonitorIndicesFlag specifies a list of validator indices to
 	// track for performance updates
 	ValidatorMonitorIndicesFlag = &cli.IntSliceFlag{

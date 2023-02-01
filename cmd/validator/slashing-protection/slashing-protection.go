@@ -4,7 +4,6 @@ import (
 	"github.com/prysmaticlabs/prysm/v5/cmd"
 	"github.com/prysmaticlabs/prysm/v5/cmd/validator/flags"
 	"github.com/prysmaticlabs/prysm/v5/config/features"
-	"github.com/prysmaticlabs/prysm/v5/runtime/tos"
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
 )
@@ -28,13 +27,10 @@ var Commands = &cli.Command{
 				features.SepoliaTestnet,
 				features.HoleskyTestnet,
 				features.EnableMinimalSlashingProtection,
-				cmd.AcceptTosFlag,
 			}),
+			// Before: tos.VerifyTosAcceptedOrPrompt,
 			Before: func(cliCtx *cli.Context) error {
-				if err := cmd.LoadFlagsFromConfig(cliCtx, cliCtx.Command.Flags); err != nil {
-					return err
-				}
-				return tos.VerifyTosAcceptedOrPrompt(cliCtx)
+				return cmd.LoadFlagsFromConfig(cliCtx, cliCtx.Command.Flags)
 			},
 			Action: func(cliCtx *cli.Context) error {
 				if err := features.ConfigureValidator(cliCtx); err != nil {
@@ -59,13 +55,9 @@ var Commands = &cli.Command{
 				features.SepoliaTestnet,
 				features.HoleskyTestnet,
 				features.EnableMinimalSlashingProtection,
-				cmd.AcceptTosFlag,
 			}),
 			Before: func(cliCtx *cli.Context) error {
-				if err := cmd.LoadFlagsFromConfig(cliCtx, cliCtx.Command.Flags); err != nil {
-					return err
-				}
-				return tos.VerifyTosAcceptedOrPrompt(cliCtx)
+				return cmd.LoadFlagsFromConfig(cliCtx, cliCtx.Command.Flags)
 			},
 			Action: func(cliCtx *cli.Context) error {
 				if err := features.ConfigureValidator(cliCtx); err != nil {

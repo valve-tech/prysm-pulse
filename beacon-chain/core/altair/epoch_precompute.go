@@ -313,39 +313,50 @@ func attestationDelta(
 	cfg := params.BeaconConfig()
 	increment := new(big.Int).SetUint64(cfg.EffectiveBalanceIncrement)
 	effectiveBalance := val.CurrentEpochEffectiveBalance
-	baseReward := (effectiveBalance / cfg.EffectiveBalanceIncrement) * baseRewardMultiplier
-	activeIncrement := new(big.Int).Div(bal.ActiveCurrentEpoch, increment).Uint64()
+	baseReward := new(big.Int).SetUint64((effectiveBalance / cfg.EffectiveBalanceIncrement) * baseRewardMultiplier)
 
-	weightDenominator := cfg.WeightDenominator
-	srcWeight := cfg.TimelySourceWeight
-	tgtWeight := cfg.TimelyTargetWeight
-	headWeight := cfg.TimelyHeadWeight
+	weightDenominator := new(big.Int).SetUint64(cfg.WeightDenominator)
+	srcWeight := new(big.Int).SetUint64(cfg.TimelySourceWeight)
+	tgtWeight := new(big.Int).SetUint64(cfg.TimelyTargetWeight)
+	headWeight := new(big.Int).SetUint64(cfg.TimelyHeadWeight)
 	attDelta := &AttDelta{}
+
+	// rewardDenominator = activeIncrement * weightDenominator
+	rewardDenominator := new(big.Int).Div(bal.ActiveCurrentEpoch, increment)
+	rewardDenominator.Mul(rewardDenominator, weightDenominator)
+
 	// Process source reward / penalty
 	if val.IsPrevEpochSourceAttester && !val.IsSlashed {
 		if !inactivityLeak {
-			n := baseReward * srcWeight * (new(big.Int).Div(bal.PrevEpochAttested, increment)).Uint64()
-			attDelta.SourceReward += n / (activeIncrement * weightDenominator)
+			n := new(big.Int).Mul(baseReward, srcWeight)
+			n.Mul(n, new(big.Int).Div(bal.PrevEpochAttested, increment))
+			attDelta.SourceReward += n.Div(n, rewardDenominator).Uint64()
 		}
 	} else {
-		attDelta.SourcePenalty += baseReward * srcWeight / weightDenominator
+		n := new(big.Int).Mul(baseReward, srcWeight)
+		n.Div(n, weightDenominator)
+		attDelta.SourcePenalty += n.Uint64()
 	}
 
 	// Process target reward / penalty
 	if val.IsPrevEpochTargetAttester && !val.IsSlashed {
 		if !inactivityLeak {
-			n := baseReward * tgtWeight * (new(big.Int).Div(bal.PrevEpochTargetAttested, increment)).Uint64()
-			attDelta.TargetReward += n / (activeIncrement * weightDenominator)
+			n := new(big.Int).Mul(baseReward, tgtWeight)
+			n.Mul(n, new(big.Int).Div(bal.PrevEpochTargetAttested, increment))
+			attDelta.TargetReward += n.Div(n, rewardDenominator).Uint64()
 		}
 	} else {
-		attDelta.TargetPenalty += baseReward * tgtWeight / weightDenominator
+		n := new(big.Int).Mul(baseReward, tgtWeight)
+		n.Div(n, weightDenominator)
+		attDelta.TargetPenalty += n.Uint64()
 	}
 
 	// Process head reward / penalty
 	if val.IsPrevEpochHeadAttester && !val.IsSlashed {
 		if !inactivityLeak {
-			n := baseReward * headWeight * (new(big.Int).Div(bal.PrevEpochHeadAttested, increment)).Uint64()
-			attDelta.HeadReward += n / (activeIncrement * weightDenominator)
+			n := new(big.Int).Mul(baseReward, headWeight)
+			n.Mul(n, new(big.Int).Div(bal.PrevEpochHeadAttested, increment))
+			attDelta.HeadReward += n.Div(n, rewardDenominator).Uint64()
 		}
 	}
 

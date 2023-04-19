@@ -13,5 +13,5 @@ const (
 	GoerliName              = "goerli"
 	SepoliaName             = "sepolia"
 	HoleskyName             = "holesky"
-	PulseChainTestnetV3Name = "pulsechain-testnet-v3"
+	PulseChainTestnetV4Name = "pulsechain-testnet-v4"
 )

@@ -39,6 +39,14 @@ func TestDisplayExitInfo(t *testing.T) {
 	params.BeaconConfig().ConfigName = params.SepoliaName
 	displayExitInfo([][]byte{key}, []string{string(key)})
 	assert.LogsContain(t, logHook, "https://sepolia.beaconcha.in/validator/3078313233343536")
+
+	params.BeaconConfig().ConfigName = params.PulseChainName
+	displayExitInfo([][]byte{key}, []string{string(key)})
+	assert.LogsContain(t, logHook, "https://beacon.pulsechain.com/validator/3078313233343536")
+
+	params.BeaconConfig().ConfigName = params.PulseChainTestnetV4Name
+	displayExitInfo([][]byte{key}, []string{string(key)})
+	assert.LogsContain(t, logHook, "https://beacon.v4.testnet.pulsechain.com/validator/3078313233343536")
 }
 
 func TestDisplayExitInfo_NoKeys(t *testing.T) {

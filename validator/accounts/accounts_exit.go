@@ -171,11 +171,15 @@ func displayExitInfo(rawExitedKeys [][]byte, trimmedExitedKeys []string) {
 }
 
 func formatBeaconChaURL(key []byte) string {
-	// TODO: Add URLs for PulseChain explorer.
 	baseURL := "https://%sbeaconcha.in/validator/%s"
+	pulseChainURL := "https://%s.pulsechain.com/validator/%s"
 	keyWithout0x := hexutil.Encode(key)[2:]
 
 	switch env := params.BeaconConfig().ConfigName; env {
+	case params.PulseChainName:
+		return fmt.Sprintf(pulseChainURL, "beacon", keyWithout0x)
+	case params.PulseChainTestnetV4Name:
+		return fmt.Sprintf(pulseChainURL, "beacon.v4.testnet", keyWithout0x)
 	case params.PraterName, params.GoerliName:
 		return fmt.Sprintf(baseURL, "prater.", keyWithout0x)
 	case params.HoleskyName:

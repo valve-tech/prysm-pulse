@@ -87,7 +87,7 @@ func TestForkChoice_ShouldOverrideFCU(t *testing.T) {
 	})
 	t.Run("parent is weak", func(t *testing.T) {
 		saved := f.store.headNode.parent.weight
-		f.store.headNode.parent.weight = 0
+		f.store.headNode.parent.weight = big.NewInt(0)
 		require.Equal(t, false, f.ShouldOverrideFCU())
 		f.store.headNode.parent.weight = saved
 	})
@@ -178,7 +178,7 @@ func TestForkChoice_GetProposerHead(t *testing.T) {
 	})
 	t.Run("parent is weak", func(t *testing.T) {
 		saved := f.store.headNode.parent.weight
-		f.store.headNode.parent.weight = 0
+		f.store.headNode.parent.weight = big.NewInt(0)
 		require.Equal(t, false, f.ShouldOverrideFCU())
 		f.store.headNode.parent.weight = saved
 	})

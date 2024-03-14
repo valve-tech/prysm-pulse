@@ -35,3 +35,14 @@ Want to get involved? Check out our [Contribution Guide](https://docs.prylabs.ne
 ## Legal Disclaimer
 
 [Terms of Use](/TERMS_OF_SERVICE.md)
+
+# Bazel-in-Docker Build
+
+To get started quickly, a bazel-in-docker script is included that allows for producing local docker image builds without setting up bazel, protoc, and the various build dependencies.
+
+This [Dockerfile](Dockerfile.builder) and [shell script](build-in-docker.sh) will produce consistent builds using Bazel-in-Docker while still taking advantage of bazel caching for fast repeat builds.
+
+```sh
+# run the bazel build in docker
+./build-in-docker.sh
+```

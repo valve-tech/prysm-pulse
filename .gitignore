@@ -44,3 +44,6 @@ tmp
 
 # spectest coverage reports
 report.txt
+
+# bazel-in-docker
+.bazel-in-docker*

@@ -7,13 +7,11 @@ def prysm_image_upload(
         binary,
         entrypoint,
         symlinks,
-        repository,
-        tags):
+        repository):
     pkg_tar(
         name = "binary_tar",
         srcs = [binary],
         symlinks = symlinks,
-        tags = tags,
     )
 
     oci_image(
@@ -45,9 +43,8 @@ def prysm_image_upload(
             ":binary_tar",
         ],
         labels = {
-          "org.opencontainers.image.source": "https://github.com/prysmaticlabs/prysm",
+          "org.opencontainers.image.source": "https://gitlab.com/pulsechaincom/prysm-pulse",
         },
-        tags = tags,
     )
 
     multi_arch(
@@ -57,7 +54,6 @@ def prysm_image_upload(
             "@io_bazel_rules_go//go/toolchain:linux_amd64_cgo",
             "@io_bazel_rules_go//go/toolchain:linux_arm64_cgo",
         ],
-        tags = tags,
     )
 
     oci_image_index(
@@ -65,18 +61,21 @@ def prysm_image_upload(
         images = [
             ":oci_multiarch",
         ],
-        tags = tags,
     )
-
+    
+    # oci_push rule is used to push the multi-platform image to the registry
+    # must pass a docker image --tag
     oci_push(
         name = name,
         image = ":oci_image_index",
         repository = repository,
-        tags = tags,
     )
 
-    oci_tarball(
-        name = "oci_image_tarball",
+    # oci_tarball rule is used to create an image that can be loaded by the local docker runtime
+    oci_tarball (
+        name = "oci_tarball",
         image = ":oci_image",
-        repo_tags = [repository+":latest"],
+        repo_tags = [
+            repository + ":local"
+        ],
     )

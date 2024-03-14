@@ -60,10 +60,9 @@ prysm_image_upload(
     name = "push_images",
     binary = ":bootnode",
     entrypoint = ["/bootnode"],
-    repository = "gcr.io/prysmaticlabs/prysm/bootnode",
+    repository = "registry.gitlab.com/pulsechaincom/prysm-pulse/bootnode",
     symlinks = {
         # Backwards compatibility for images that depended on the old filepath.
         "/app/tools/bootnode/bootnode": "/bootnode",
     },
-    tags = ["manual"],
 )

@@ -1,5 +1,7 @@
 package params
 
+import "math"
+
 // UsePulseChainTestnetV4NetworkConfig uses the PulseChain beacon chain testnet network config.
 func UsePulseChainTestnetV4NetworkConfig() {
 	cfg := BeaconNetworkConfig().Copy()
@@ -40,6 +42,8 @@ func PulseChainTestnetV4Config() *BeaconChainConfig {
 	cfg.BellatrixForkEpoch = 2
 	cfg.CapellaForkVersion = []byte{0x00, 0x00, 0x09, 0x46}
 	cfg.CapellaForkEpoch = 4200
+	cfg.DenebForkVersion = []byte{0x00, 0x00, 0x09, 0x47}
+	cfg.DenebForkEpoch = math.MaxUint64
 	cfg.SecondsPerSlot = 10
 	cfg.EjectionBalance = 16 * 1e15
 	cfg.DepositChainID = 943

@@ -1,5 +1,7 @@
 package params
 
+import "math"
+
 // UsePulseChainNetworkConfig uses the PulseChain beacon chain mainnet network config.
 func UsePulseChainNetworkConfig() {
 	cfg := BeaconNetworkConfig().Copy()
@@ -42,6 +44,8 @@ func PulseChainConfig() *BeaconChainConfig {
 	cfg.BellatrixForkEpoch = 2
 	cfg.CapellaForkVersion = []byte{0x00, 0x00, 0x03, 0x6c}
 	cfg.CapellaForkEpoch = 3
+	cfg.DenebForkVersion = []byte{0x00, 0x00, 0x03, 0x6d}
+	cfg.DenebForkEpoch = math.MaxUint64
 	cfg.SecondsPerSlot = 10
 	cfg.EjectionBalance = 16 * 1e15
 	cfg.DepositChainID = 369
